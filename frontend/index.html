@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Disease Detection - Health Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .page { display: none; }
+    .page.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(8px);} to {opacity:1; transform: translateY(0);} }
+    .symptom-card.selected { background: #3b82f6; color: white; border-color: #2563eb; }
+    .dark .symptom-card.selected { background: #2563eb; }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-white dark:bg-slate-800 shadow-sm border-b dark:border-slate-700">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white text-lg"><i class="fa-solid fa-stethoscope"></i></div>
+        <div>
+          <h1 class="font-bold text-lg leading-none">HealthHub</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400">AI Based Disease Detection & Nutrition Analysis</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div id="apiBadge" class="text-xs px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-200">Checking API...</div>
+        <button onclick="toggleDark()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600">
+          <i id="darkIcon" class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Stepper -->
+    <div class="max-w-6xl mx-auto px-4 pb-3">
+      <div class="flex items-center gap-2">
+        <button onclick="goTo(1)" id="step1" class="step flex-1 py-2 px-2 rounded-lg text-sm font-semibold bg-blue-600 text-white"><i class="fa-solid fa-user mr-1"></i> Profile</button>
+        <div class="h-1 flex-1 bg-slate-200 dark:bg-slate-700 rounded"><div id="prog1" class="h-1 bg-blue-600 rounded transition-all" style="width:0%"></div></div>
+        <button onclick="goTo(2)" id="step2" class="step flex-1 py-2 px-2 rounded-lg text-sm font-semibold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"><i class="fa-solid fa-virus mr-1"></i> Symptoms</button>
+        <div class="h-1 flex-1 bg-slate-200 dark:bg-slate-700 rounded"><div id="prog2" class="h-1 bg-blue-600 rounded" style="width:0%"></div></div>
+        <button onclick="goTo(3)" id="step3" class="step flex-1 py-2 px-2 rounded-lg text-sm font-semibold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"><i class="fa-solid fa-utensils mr-1"></i> Nutrition</button>
+        <div class="h-1 flex-1 bg-slate-200 dark:bg-slate-700 rounded"><div id="prog3" class="h-1 bg-blue-600 rounded" style="width:0%"></div></div>
+          <button onclick="goTo(4)" id="step4" class="step flex-1 py-2 px-2 rounded-lg text-sm font-semibold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"><i class="fa-solid fa-file-pdf mr-1"></i> Report</button>
+          <div class="h-1 flex-1 bg-slate-200 dark:bg-slate-700 rounded"><div id="prog4" class="h-1 bg-blue-600 rounded" style="width:0%"></div></div>
+          <button onclick="goTo(5)" id="step5" class="step flex-1 py-2 px-2 rounded-lg text-sm font-semibold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"><i class="fa-solid fa-chart-line mr-1"></i> Tracker</button>
+        </div>
+      </div>
+    </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+
+    <!-- PAGE 1: Profile -->
+    <div id="page1" class="page active">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 border dark:border-slate-700">
+        <h2 class="text-2xl font-bold mb-1">Welcome <span class="text-blue-600">👋</span></h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Enter your details for personalized prediction & diet. This stays on your device.</p>
+        
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium">Full Name *</label>
+            <input id="pName" type="text" placeholder="e.g. Aarav Sharma" class="mt-1 w-full px-3 py-2.5 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="text-sm font-medium">Gender *</label>
+            <select id="pGender" class="mt-1 w-full px-3 py-2.5 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="">Select</option><option>Male</option><option>Female</option><option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm font-medium">Age</label>
+            <input id="pAge" type="number" placeholder="25" class="mt-1 w-full px-3 py-2.5 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-700">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm font-medium">Height (cm) *</label>
+              <input id="pHeight" type="number" placeholder="175" oninput="calcBMI()" class="mt-1 w-full px-3 py-2.5 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-700">
+            </div>
+            <div>
+              <label class="text-sm font-medium">Weight (kg) *</label>
+              <input id="pWeight" type="number" placeholder="70" oninput="calcBMI()" class="mt-1 w-full px-3 py-2.5 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-700">
+            </div>
+          </div>
+          <div class="md:col-span-2 bg-blue-50 dark:bg-slate-700/50 rounded-lg p-3 flex justify-between items-center">
+            <span class="text-sm"><i class="fa-solid fa-calculator text-blue-600 mr-1"></i> BMI: <b id="bmiVal">--</b> <span id="bmiCat" class="text-xs px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-600 ml-2">enter height/weight</span></span>
+            <span class="text-xs text-slate-500">Normal: 18.5-24.9</span>
+          </div>
+          <div>
+            <label class="text-sm font-medium">Activity Level *</label>
+            <select id="pActivity" class="mt-1 w-full px-3 py-2.5 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-700">
+              <option value="1.2">Sedentary (office, no exercise)</option>
+              <option value="1.375">Light (1-2 days/week)</option>
+              <option value="1.55" selected>Moderate (3-4 days/week)</option>
+              <option value="1.725">Active (5-6 days/week)</option>
+              <option value="1.9">Athlete (2x/day heavy)</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="text-sm font-medium">Prior Disease History</label>
+            <textarea id="pHistory" rows="2" placeholder="e.g. Asthma (2019), Diabetes in family..." class="mt-1 w-full px-3 py-2.5 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-700"></textarea>
+            <p class="text-xs text-slate-400 mt-1">Used for calories + prediction.</p>
+          </div>
+        </div>
+
+        <div class="flex gap-3 mt-6">
+          <button onclick="saveProfile()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl">Save & Continue <i class="fa-solid fa-arrow-right ml-1"></i></button>
+          <button onclick="clearProfile()" class="px-6 py-3 rounded-xl border dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700">Clear</button>
+        </div>
+        <p id="pError" class="text-sm text-red-600 mt-3 hidden"></p>
+      </div>
+    </div>
+
+    <!-- PAGE 2: Symptoms -->
+    <div id="page2" class="page">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 border dark:border-slate-700">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h2 class="text-xl font-bold">Select Symptoms</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Hi <b id="greetName">there</b> - tick all that apply (min 2 for accuracy)</p>
+          </div>
+          <span id="selCount" class="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 text-sm font-bold px-3 py-1 rounded-full">0 selected</span>
+        </div>
+        
+        <div id="symptomsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"></div>
+
+        <div class="flex gap-3">
+          <button id="predictBtn" onclick="predict()" class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-semibold py-3 rounded-xl disabled:cursor-not-allowed"> <i class="fa-solid fa-magnifying-glass mr-1"></i> Predict Disease</button>
+          <button onclick="clearSymptoms()" class="px-6 py-3 rounded-xl border dark:border-slate-600">Clear</button>
+        </div>
+
+        <div id="result" class="hidden mt-6"></div>
+      </div>
+    </div>
+
+    <!-- PAGE 3: Nutrition + Exercise (Option 1 tabs) -->
+    <div id="page3" class="page">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 border dark:border-slate-700">
+        <h2 class="text-xl font-bold">Lifestyle Plan</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Goal + Diet -> Diet & Workout. For <b id="nutriName">you</b> <span id="nutriBMI" class="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full ml-2"></span></p>
+        <div id="calorieSuggest" class="mb-4 p-3 rounded-xl border dark:border-slate-600 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-slate-700 dark:to-slate-700 hidden"></div>
+
+        <div class="grid md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="text-sm font-medium">Goal *</label>
+            <select id="goal" onchange="renderNutrition()" class="mt-1 w-full px-3 py-2.5 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-700">
+              <option value="muscle">💪 Muscle Building</option>
+              <option value="weight_gain">🍚 Weight Gain (Healthy)</option>
+              <option value="weight_loss">⚖️ Weight Loss</option>
+              <option value="fat_loss">🔥 Fat Loss (Cutting)</option>
+              <option value="maintenance">🥗 Maintenance / General Health</option>
+              <option value="endurance">🏃 Endurance / Stamina</option>
+              <option value="immunity">🛡️ Immunity Boost</option>
+              <option value="diabetic">🩸 Diabetes-Friendly</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm font-medium">Diet Type *</label>
+            <select id="diet" onchange="renderNutrition()" class="mt-1 w-full px-3 py-2.5 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-700">
+              <option value="veg">🥬 Vegetarian</option>
+              <option value="vegan">🌱 Vegan</option>
+              <option value="nonveg">🍗 Non-Veg</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex p-1 bg-slate-100 dark:bg-slate-700 rounded-xl mb-4">
+          <button id="tabDiet" onclick="switchTab('diet')" class="flex-1 py-2 rounded-lg font-semibold bg-white dark:bg-slate-800 shadow text-blue-600"><i class="fa-solid fa-utensils mr-1"></i> Diet Plan</button>
+          <button id="tabWorkout" onclick="switchTab('workout')" class="flex-1 py-2 rounded-lg font-semibold text-slate-600 dark:text-slate-300"><i class="fa-solid fa-dumbbell mr-1"></i> Workout Plan</button>
+        </div>
+
+        <div id="dietTab">
+          <div id="nutritionPlan" class="space-y-3"></div>
+          <div id="nutritionTip" class="mt-4 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl text-sm"></div>
+        </div>
+
+        <div id="workoutTab" class="hidden">
+          <div id="workoutPlan" class="space-y-3"></div>
+          <div id="workoutTip" class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl text-sm"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 4: Report -->
+    <div id="page4" class="page">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 border dark:border-slate-700" id="reportCard">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h2 class="text-xl font-bold">Health Report</h2>
+            <p class="text-sm text-slate-500">Generated: <span id="reportDate"></span> • ID: <span id="reportId" class="font-mono"></span></p>
+          </div>
+          <span class="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 px-3 py-1 rounded-full">Ready to download</span>
+        </div>
+
+        <div id="reportContent" class="space-y-4 text-sm"></div>
+
+        <div class="flex gap-3 mt-6">
+          <button onclick="downloadPDF()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl"><i class="fa-solid fa-download mr-1"></i> Download PDF</button>
+          <button onclick="window.print()" class="px-6 py-3 rounded-xl border dark:border-slate-600"><i class="fa-solid fa-print mr-1"></i> Print</button>
+        </div>
+        <p class="text-xs text-center text-slate-400 mt-3">⚠️ AI prediction, not medical advice. Consult doctor.</p>
+      </div>
+    </div>
+
+  </main>
+
+    <!-- PAGE 5: Progress Tracker -->
+    <div id="page5" class="page">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 border dark:border-slate-700">
+        <h2 class="text-xl font-bold"><i class="fa-solid fa-chart-line text-blue-600 mr-1"></i> Progress Tracker</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Log weight weekly • auto BMI + chart. Data stays local.</p>
+        
+        <div class="grid md:grid-cols-3 gap-3 mb-4">
+          <div class="p-3 bg-blue-50 dark:bg-slate-700 rounded-xl text-center"><p class="text-xs text-slate-500">Current BMI</p><p id="trackerBMI" class="text-xl font-bold">--</p><p id="trackerCat" class="text-xs"></p></div>
+          <div class="p-3 bg-green-50 dark:bg-slate-700 rounded-xl text-center"><p class="text-xs text-slate-500">Start Weight</p><p id="trackerStart" class="text-xl font-bold">--</p></div>
+          <div class="p-3 bg-purple-50 dark:bg-slate-700 rounded-xl text-center"><p class="text-xs text-slate-500">Change</p><p id="trackerChange" class="text-xl font-bold">--</p></div>
+        </div>
+
+        <div class="flex gap-2 mb-4">
+          <input id="logWeight" type="number" placeholder="Weight kg" class="flex-1 px-3 py-2.5 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-700">
+          <input id="logDate" type="date" class="px-3 py-2.5 rounded-lg border dark:border-slate-600 bg-white dark:bg-slate-700">
+          <button onclick="addLog()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold">Add</button>
+        </div>
+
+        <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 mb-4" style="height:280px">
+          <canvas id="progressChart"></canvas>
+        </div>
+
+        <div class="max-h-48 overflow-auto border dark:border-slate-600 rounded-xl">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-100 dark:bg-slate-700 sticky top-0"><tr><th class="p-2 text-left">Date</th><th class="p-2">Weight</th><th class="p-2">BMI</th><th class="p-2"></th></tr></thead>
+            <tbody id="logTable"></tbody>
+          </table>
+        </div>
+        <div class="flex gap-2 mt-3">
+          <button onclick="clearLogs()" class="text-sm px-4 py-2 rounded-lg border dark:border-slate-600">Clear All</button>
+          <button onclick="exportTrackerPDF()" class="text-sm px-4 py-2 rounded-lg bg-slate-900 dark:bg-white dark:text-slate-900 text-white"><i class="fa-solid fa-download mr-1"></i> Export Tracker PDF</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Floating Voice Button -->
+  <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+    <div id="voiceTranscript" class="hidden max-w-xs bg-slate-900 text-white text-sm p-3 rounded-2xl shadow-lg"></div>
+    <button id="voiceBtn" onclick="toggleVoice()" class="w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex items-center justify-center text-xl">
+      <i id="voiceIcon" class="fa-solid fa-microphone"></i>
+    </button>
+    <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-full shadow border dark:border-slate-700">🎤 Voice - tap to speak</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
