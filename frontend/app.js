@@ -1,4 +1,4 @@
-const API_BASE = window.location.port === "8000" ? window.location.origin : "http://localhost:8000";
+const API_BASE = window.location.origin.startsWith("http") ? window.location.origin : "http://localhost:8000";
 
 let state = JSON.parse(localStorage.getItem("hh_state") || "null") || {
   profile: { name:"", gender:"", age:"", height:"", weight:"", history:"", activity:"1.55" },
